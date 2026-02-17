@@ -1,16 +1,27 @@
-import tkinter as tk
 from .base import CareStageStrategy
 
 class MonitoringStrategy(CareStageStrategy):
-    def build_interface(self, parent):
-        tk.Label(parent, text="📉 Continuous Monitoring", font=('Arial', 16, 'bold'), fg="#EF5350", bg="#0B1120").pack(pady=10)
-        
-        canvas = tk.Canvas(parent, width=300, height=100, bg="#131B33", highlightthickness=0)
-        canvas.pack(pady=10)
-        # Mock Recovery Trajectory
-        canvas.create_line(0, 80, 50, 70, 100, 40, 200, 30, 300, 10, fill="#64FFDA", width=3)
-        
-        tk.Label(parent, text="Recovery Trajectory: On Track", fg="#64FFDA", bg="#0B1120").pack()
+    def get_metadata(self) -> dict:
+        return {
+            "title": "📉 Continuous Monitoring",
+            "description": "Patient Vitals & Recovery",
+            "content": [
+               {
+                   "type": "chart",
+                   "chart_type": "line",
+                   "label": "Recovery Trajectory",
+                   "data": [
+                       {"x": 1, "y": 80},
+                       {"x": 2, "y": 70},
+                       {"x": 3, "y": 40},
+                       {"x": 4, "y": 30},
+                       {"x": 5, "y": 10}
+                   ],
+                   "color": "#64FFDA"
+               },
+               {"type": "text", "text": "Recovery Trajectory: On Track", "style": "success"}
+            ]
+        }
 
-    def process_action(self, data):
-        pass
+    def process_action(self, data: dict) -> dict:
+        return {"status": "success", "data": "Refresh complete"}

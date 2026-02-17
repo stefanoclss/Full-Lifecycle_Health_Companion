@@ -1,17 +1,29 @@
-import tkinter as tk
-from tkinter import messagebox
+import logging
 from .base import CareStageStrategy
+from model_registry import ModelRegistry
 
 class HomeTriageStrategy(CareStageStrategy):
-    def build_interface(self, parent):
-        tk.Label(parent, text="🏠 Home Self-Triage", font=('Arial', 16, 'bold'), fg="#4FC3F7", bg="#0B1120").pack(pady=10)
-        tk.Label(parent, text="MedASR Voice / Derm Photo Triage", fg="#8892B0", bg="#0B1120").pack()
-        
-        self.input = tk.Entry(parent, width=40)
-        self.input.insert(0, "Describe symptoms or upload photo path...")
-        self.input.pack(pady=20)
-        
-        tk.Button(parent, text="Run Edge AI Analysis", command=lambda: self.process_action(self.input.get())).pack()
+    def get_metadata(self) -> dict:
+        return {
+            "title": "🏠 Home Self-Triage",
+            "description": "MedASR Voice / Derm Photo Triage",
+            "inputs": [
+                {"name": "description", "label": "Describe symptoms or upload photo path", "type": "text", "placeholder": "Describe symptoms..."}
+            ],
+            "actions": [
+                {"name": "analyze", "label": "Run Edge AI Analysis"}
+            ]
+        }
 
-    def process_action(self, data):
-        messagebox.showinfo("MedGemma-4b", f"Analyzing: {data}\nResult: Priority Level 2 - Suggested Clinic Visit.")
+    def process_action(self, data: dict) -> dict:
+        user_input = data.get("description", "")
+        
+        # Use ModelRegistry for AI inference
+        result = ModelRegistry.run_inference("triage_edge", f"Analyze symptoms: {user_input}")
+        
+        return {
+            "status": "success",
+            "message": "Analysis Complete",
+            "data": result,
+            "alert": True
+        }

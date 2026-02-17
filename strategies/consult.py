@@ -1,17 +1,37 @@
-import tkinter as tk
 from .base import CareStageStrategy
+from model_registry import ModelRegistry
 
 class ConsultStrategy(CareStageStrategy):
-    def build_interface(self, parent):
-        tk.Label(parent, text="🩺 Clinical Consultation", font=('Arial', 16, 'bold'), fg="#FFA726", bg="#0B1120").pack(pady=10)
-        
-        btn_frame = tk.Frame(parent, bg="#0B1120")
-        btn_frame.pack(pady=10)
-        
-        tk.Button(btn_frame, text="Analyze CXR (X-Ray)", width=20).grid(row=0, column=0, padx=5, pady=5)
-        tk.Button(btn_frame, text="Live Transcription", width=20).grid(row=0, column=1, padx=5, pady=5)
-        tk.Button(btn_frame, text="Pathology View", width=20).grid(row=1, column=0, padx=5, pady=5)
-        tk.Button(btn_frame, text="Differential DX", width=20).grid(row=1, column=1, padx=5, pady=5)
+    def get_metadata(self) -> dict:
+        return {
+            "title": "🩺 Clinical Consultation",
+            "description": "AI-Augmented Physician Tools",
+            "actions": [
+                {"name": "cxr", "label": "Analyze CXR (X-Ray)"},
+                {"name": "transcribe", "label": "Live Transcription"},
+                {"name": "pathology", "label": "Pathology View"},
+                {"name": "diff_dx", "label": "Differential DX"}
+            ]
+        }
 
-    def process_action(self, data):
-        pass
+    def process_action(self, data: dict) -> dict:
+        action = data.get("action", "unknown")
+        
+        result = "Action executed."
+        if action == "diff_dx":
+             # Use the large reasoning model
+             result = ModelRegistry.run_inference("consult_reasoning", "Generate differential diagnosis.")
+        else:
+             # Mock responses for others for now
+             responses = {
+                "cxr": "Chest X-Ray Analyzed: Clear fields.",
+                "transcribe": "Transcription started...",
+                "pathology": "Pathology slides loaded."
+            }
+             result = responses.get(action, "Unknown action")
+
+        return {
+            "status": "success",
+            "message": f"Action '{action}' executed.",
+            "data": result
+        }
