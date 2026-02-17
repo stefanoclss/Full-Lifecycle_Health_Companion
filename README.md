@@ -68,24 +68,20 @@ This application relies on specific pre-trained models. You need to download the
 
 ## Running the Application
 
-### Backend Server
-Start the FastAPI backend server:
+Start the application server:
 ```bash
 python server.py
 ```
-The server will start at `http://127.0.0.1:8000`. API documentation is available at `http://127.0.0.1:8000/docs`.
 
-### Frontend Interface
-Launch the Tkinter-based frontend application:
-```bash
-python frontend.py
-```
-*   Press `Esc` to exit full-screen mode.
+Once the server is running, open your web browser and navigate to:
+`http://127.0.0.1:8000`
+
+API documentation is available at `http://127.0.0.1:8000/docs`.
 
 ## Project Structure
 
-*   `server.py`: FastAPI backend handling API requests and serving static files.
-*   `frontend.py`: Desktop client application (Tkinter) acting as the patient interface.
+*   `server.py`: FastAPI backend that serves the web interface and handles API requests.
+*   `static/`: Directory containing the frontend HTML, CSS, and JavaScript files.
 *   `download_models.py`: Utility script to download necessary AI models from HuggingFace.
 *   `strategies/`: Contains the logic for different care stages (Home Triage, Intake, Consult, Pharmacy, Monitoring).
 *   `ml_models/`: Directory where downloaded models are stored (created after running the download script).
