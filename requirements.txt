@@ -4,6 +4,8 @@ uvicorn[standard]>=0.27.0
 pydantic>=2.6.0
 python-multipart>=0.0.9  # For file uploads
 httpx>=0.27.0            # For internal HTTP requests
+pandas>=2.2.0            # For data manipulation
+sqlalchemy>=2.0.0        # For database abstraction
 
 # === AI & Machine Learning ===
 huggingface_hub>=0.20.0  # For downloading models

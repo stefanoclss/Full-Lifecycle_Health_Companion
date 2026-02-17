@@ -78,6 +78,22 @@ Once the server is running, open your web browser and navigate to:
 
 API documentation is available at `http://127.0.0.1:8000/docs`.
 
+## Database Inspection
+
+The application uses a local SQLite database located at `data/db/health_companion.db`.
+
+**Simplest way to view data (using Python):**
+
+Running the following command will print row counts for daily activty:
+```bash
+python -c "from sqlalchemy import create_engine, text; engine = create_engine('sqlite:///data/db/health_companion.db'); conn = engine.connect(); print('Daily Activity:', conn.execute(text('SELECT count(*) FROM daily_activity')).scalar());"
+```
+
+**Alternative Tools:**
+
+*   **DB Browser for SQLite**: A free, open-source visual tool to browse and edit database files.
+*   **VS Code Extensions**: Extensions like "SQLite Viewer" allow you to view databases directly in the editor.
+
 ## Project Structure
 
 *   `server.py`: FastAPI backend that serves the web interface and handles API requests.
