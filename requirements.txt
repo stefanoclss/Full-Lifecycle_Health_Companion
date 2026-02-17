@@ -1,0 +1,26 @@
+# === Core Application ===
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.6.0
+python-multipart>=0.0.9  # For file uploads
+httpx>=0.27.0            # For internal HTTP requests
+
+# === AI & Machine Learning ===
+huggingface_hub>=0.20.0  # For downloading models
+llama-cpp-python>=0.2.55 # For GGUF Inference (CPU/GPU)
+transformers>=4.38.0     # For Full Model Inference
+torch>=2.2.0             # Deep Learning Framework
+accelerate>=0.27.0       # Model loading optimization
+scipy>=1.12.0            # Often needed for scientific computing
+
+# === Development & Maturity ===
+pytest>=8.0.0            # Testing Framework
+pytest-asyncio>=0.23.0   # Async support for tests
+ruff>=0.3.0              # Fast Linter & Formatter
+mypy>=1.8.0              # Static Type Checker
+pre-commit>=3.6.0        # Git Hook Management
+black>=24.2.0            # Code Formatter (optional if using ruff, but standard)
+
+# === Production Readiness ===
+gunicorn>=21.2.0         # Production WSGI/ASGI Server Manager
+python-dotenv>=1.0.1     # Environment variable management

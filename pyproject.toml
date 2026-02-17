@@ -1,0 +1,43 @@
+[project]
+name = "arcvault-health-companion"
+version = "0.1.0"
+description = "Full-Lifecycle Health Companion with AI integration"
+authors = [
+    {name = "Stefano Claes", email = "[EMAIL_ADDRESS]"},
+]
+requires-python = ">=3.10"
+
+[tool.ruff]
+# Ruff configuration for fast linting AND formatting
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort (imports)
+    "B",  # flake8-bugbear
+    "UP", # pyupgrade
+]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false  # Set to true for stricter typing
+ignore_missing_imports = true  # Useful for some ML libraries
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --asyncio-mode=auto"
+testpaths = [
+    "tests",
+]
+python_files = "test_*.py"
