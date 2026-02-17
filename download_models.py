@@ -24,12 +24,17 @@ import argparse
 from pathlib import Path
 from typing import Optional
 
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 # ============================================================
 # CONFIGURATION — HuggingFace token
 # ============================================================
 # Reads from environment variable HF_TOKEN by default.
 # Override here only if you can't set an env var:
-HF_TOKEN = os.environ.get("HF_TOKEN", "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")
+HF_TOKEN = os.environ.get("HF_TOKEN")
 
 # Output directory
 BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ml_models")
