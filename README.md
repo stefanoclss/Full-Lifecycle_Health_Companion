@@ -17,6 +17,36 @@ ArcVault Health Companion is an advanced health companion application designed t
     *   [Generate a User Access Token](https://huggingface.co/settings/tokens) (Read access is sufficient)
     *   **Important**: You must visit the model pages (lines 63-122 in `download_models.py`) and accept the license agreements for each model (e.g., `google/medgemma-1.5-4b-it`, `google/txgemma-2b-predict`, etc.).
 
+## ⚠️ Windows Troubleshooting: Python & MAX_PATH
+
+**Critical for PyTorch/CUDA**: If you encounter `DLL load failed` or `MAX_PATH` errors (common with the Microsoft Store version of Python), follow these steps to fix your environment:
+
+1.  **Uninstall Microsoft Store Python**:
+    *   Go to **Settings > Apps > Installed apps**.
+    *   Search for "Python" and uninstall any entries that look like "Python 3.x (Microsoft Store)".
+
+2.  **Install Official Python 3.12**:
+    *   **Do NOT install Python 3.13 or 3.14** (many AI libraries don't support them yet).
+    *   Download **Python 3.12** from [python.org/downloads/release/python-3128/](https://www.python.org/downloads/release/python-3128/).
+    *   **Run the installer** and ensure you check:
+        *   [x] **Add Python to PATH** (at the bottom of the first screen).
+    *   **Click "Disable path length limit"**:
+        *   At the very end of the installation (successful screen), click the option to **Disable path length limit**. This fixes the MAX_PATH issue for deep library paths like PyTorch.
+
+3.  **Re-create Virtual Environment**:
+    ```bash
+    # Delete old venv
+    Remove-Item -Recurse -Force .venv
+    
+    # Create new one with the clean Python
+    python -m venv .venv
+    .venv\Scripts\activate
+    
+    # Re-install dependencies
+    pip install -r requirements.txt
+    pip install torch --index-url https://download.pytorch.org/whl/cu121  # Or cpu if no GPU
+    ```
+
 ## Installation
 
 1.  **Clone the repository:**

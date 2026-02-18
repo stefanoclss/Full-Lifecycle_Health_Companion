@@ -1,0 +1,45 @@
+Tables: ['daily_activity', 'hourly_steps', 'minute_steps', 'sleep_log', 'heart_rate']
+
+--- Schema for daily_activity ---
+(0, 'id', 'INTEGER', 1, None, 1)
+(1, 'user_id', 'VARCHAR', 0, None, 0)
+(2, 'activity_date', 'DATE', 0, None, 0)
+(3, 'total_steps', 'INTEGER', 0, None, 0)
+(4, 'total_distance', 'FLOAT', 0, None, 0)
+(5, 'tracker_distance', 'FLOAT', 0, None, 0)
+(6, 'logged_activities_distance', 'FLOAT', 0, None, 0)
+(7, 'very_active_distance', 'FLOAT', 0, None, 0)
+(8, 'moderately_active_distance', 'FLOAT', 0, None, 0)
+(9, 'light_active_distance', 'FLOAT', 0, None, 0)
+(10, 'sedentary_active_distance', 'FLOAT', 0, None, 0)
+(11, 'very_active_minutes', 'INTEGER', 0, None, 0)
+(12, 'fairly_active_minutes', 'INTEGER', 0, None, 0)
+(13, 'lightly_active_minutes', 'INTEGER', 0, None, 0)
+(14, 'sedentary_minutes', 'INTEGER', 0, None, 0)
+(15, 'calories', 'INTEGER', 0, None, 0)
+
+--- Schema for hourly_steps ---
+(0, 'id', 'INTEGER', 1, None, 1)
+(1, 'user_id', 'VARCHAR', 0, None, 0)
+(2, 'activity_hour', 'DATETIME', 0, None, 0)
+(3, 'step_total', 'INTEGER', 0, None, 0)
+
+--- Schema for minute_steps ---
+(0, 'id', 'INTEGER', 1, None, 1)
+(1, 'user_id', 'VARCHAR', 0, None, 0)
+(2, 'activity_minute', 'DATETIME', 0, None, 0)
+(3, 'steps', 'INTEGER', 0, None, 0)
+
+--- Schema for sleep_log ---
+(0, 'id', 'INTEGER', 1, None, 1)
+(1, 'user_id', 'VARCHAR', 0, None, 0)
+(2, 'sleep_day', 'DATE', 0, None, 0)
+(3, 'total_sleep_records', 'INTEGER', 0, None, 0)
+(4, 'total_minutes_asleep', 'INTEGER', 0, None, 0)
+(5, 'total_time_in_bed', 'INTEGER', 0, None, 0)
+
+--- Schema for heart_rate ---
+(0, 'id', 'INTEGER', 1, None, 1)
+(1, 'user_id', 'VARCHAR', 0, None, 0)
+(2, 'time', 'DATETIME', 0, None, 0)
+(3, 'value', 'INTEGER', 0, None, 0)
