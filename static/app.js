@@ -81,7 +81,7 @@ function loadStrategy(strategy) {
     `;
 
     // Render Content (Tables, Charts, Text)
-    if (strategy.content) {
+    if (strategy.content && strategy.content.length > 0) {
         html += `<div class="grid gap-6">`;
         strategy.content.forEach(item => {
             if (item.type === 'text') {
@@ -126,8 +126,12 @@ function loadStrategy(strategy) {
         }
     }
 
-    // Result Area
+    // Result Area (Always render it, and let strategy module populate it if it wants)
     html += `<div id="result-area" class="hidden glass-panel p-6 rounded-2xl border-l-4 border-brand-accent bg-brand-accent/5"></div>`;
+
+    // Custom Container for strategies that take over the UI (like detailed Intake)
+    html += `<div id="strategy-custom-container"></div>`;
+
     html += `</div>`; // End container
 
     contentArea.innerHTML = html;
@@ -139,6 +143,16 @@ function loadStrategy(strategy) {
                 renderChart(`chart-${strategy.id}`, item);
             }
         });
+    }
+
+    // INITIALIZE STRATEGY MODULE
+    // This allows the strategy to render custom UI immediately (e.g. Chat interface)
+    const strategyModule = getStrategy(currentStrategyId, currentMetadata);
+    const customContainer = document.getElementById('strategy-custom-container');
+
+    // We pass null data to indicate "initial load"
+    if (strategyModule && typeof strategyModule.renderResults === 'function') {
+        strategyModule.renderResults(null, customContainer, null);
     }
 }
 

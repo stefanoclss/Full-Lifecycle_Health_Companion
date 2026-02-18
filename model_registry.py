@@ -5,7 +5,7 @@ MODELS_DIR = os.path.join(BASE_DIR, "ml_models")
 
 MODEL_PATHS = {
     "triage_edge": os.path.join(MODELS_DIR, "gguf", "gemma-2-2b-it-Q4_K_M.gguf"),
-    "intake_chat": os.path.join(MODELS_DIR, "txgemma-2b-predict"),
+    "intake_chat": os.path.join(MODELS_DIR, "medgemma-1.5-4b-it"),
     "consult_reasoning": os.path.join(MODELS_DIR, "medgemma-1.5-4b-it"),
     "cxr_foundation": os.path.join(MODELS_DIR, "cxr-foundation"),
     "medasr": os.path.join(MODELS_DIR, "medasr"),
