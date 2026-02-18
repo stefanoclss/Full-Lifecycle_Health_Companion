@@ -1,9 +1,10 @@
-import logging
 import os
 import json
 from sqlalchemy import create_engine, text
 from .base import CareStageStrategy
 from model_registry import ModelRegistry
+from data.medical_vault import vault
+from utils.logger import logger
 
 # Database configuration
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,17 +20,48 @@ class HomeTriageStrategy(CareStageStrategy):
             "inputs": [],
             "actions": [
                 {"name": "analyze_trends", "label": "Analyse Health Records"}
+                # save_analysis is hidden and called programmatically
             ]
         }
 
     def process_action(self, data: dict) -> dict:
-        return self.analyze_trends()
+        action = data.get("action")
+        if action == "analyze_trends":
+            return self.analyze_trends()
+        elif action == "save_analysis":
+            return self.save_analysis(data.get("payload"))
+        else:
+            return {"status": "error", "message": "Unknown action"}
+
+    def save_analysis(self, payload):
+        """Manually saves analysis results to the vault."""
+        try:
+            if not payload:
+                return {"status": "error", "message": "No data to save"}
+            
+            logger.info("Manual Save Requested.")
+            # Store in Medical Vault
+            entry_id = vault.store_entry(
+                category="Home Triage",
+                content=payload,
+                tags=["AI", "Triage", "Manual"]
+            )
+            return {
+                "status": "success", 
+                "message": "Analysis saved to Vault successfully!", 
+                "data": {"id": entry_id}
+            }
+        except Exception as e:
+            logger.error(f"Save failed: {e}")
+            return {"status": "error", "message": f"Save failed: {str(e)}"}
 
     def analyze_trends(self):
         """Queries DB and uses AI logprobs to classify patient status across 5 dimensions."""
         try:
+            logger.info("Starting Home Triage Analysis...")
             data = self._fetch_patient_data()
             
+            # ... dimensions definition ...
             dimensions = [
                 {
                     "name": "Metabolic Engine",
@@ -69,6 +101,10 @@ class HomeTriageStrategy(CareStageStrategy):
                 analysis["focus"] = dim["focus"]
                 results.append(analysis)
 
+            # Auto-save removed. User must click save.
+            
+            logger.info(f"Analysis complete. Metrics: {data}")
+
             return {
                 "status": "success",
                 "message": "Multi-dimensional Health Analysis Complete",
@@ -77,7 +113,7 @@ class HomeTriageStrategy(CareStageStrategy):
             }
 
         except Exception as e:
-            logging.error(f"Trend analysis failed: {e}")
+            logger.error(f"Trend analysis failed: {e}")
             return {
                 "status": "error",
                 "message": f"Failed to analyze trends: {str(e)}",

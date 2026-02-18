@@ -1,3 +1,5 @@
+import { getStrategy } from './strategies/index.js?v=8';
+
 // State
 let currentStrategyId = null;
 let currentMetadata = null;
@@ -28,38 +30,35 @@ async function init() {
 function renderSidebar(strategies) {
     navContainer.innerHTML = strategies.map(s => `
         <button 
-            onclick="loadStrategyById('${s.id}')"
+            onclick="window.loadStrategyById('${s.id}')"
             class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors flex items-center gap-3 group"
             data-id="${s.id}"
         >
             <div class="w-2 h-8 bg-slate-700 rounded-full group-hover:bg-brand-accent transition-colors"></div>
             <div>
-                <div class="text-sm font-medium text-slate-200 group-hover:text-white">${s.title.replace(/^[^\s]+\s/, '')}</div> <!-- Remove icon from title -->
+                <div class="text-sm font-medium text-slate-200 group-hover:text-white">${s.title.replace(/^[^\s]+\s/, '')}</div>
                 <div class="text-xs text-slate-500 group-hover:text-slate-400 truncate w-40">${s.description}</div>
             </div>
         </button>
     `).join('');
 }
 
-// Load Strategy Wrapper
-async function loadStrategyById(id) {
-    // Re-fetch to ensure fresh state if needed, or find from cache
-    // For now we just find it from the sidebar data if possible, or re-fetch list logic could be added
-    // Simpler: Fetch specific strategy info or just pass full object from init.
-    // Let's refetch all for simplicity or pass object.
-    // We already have the list, let's just find it.
+// Load Strategy Wrapper (Exposed to window for onclick)
+window.loadStrategyById = async function (id) {
     const buttons = navContainer.querySelectorAll('button');
     buttons.forEach(btn => {
         if (btn.dataset.id === id) {
             btn.classList.add('bg-slate-800');
-            btn.querySelector('div.bg-slate-700').classList.add('bg-brand-accent');
+            const indicator = btn.querySelector('.bg-slate-700');
+            if (indicator) indicator.classList.add('bg-brand-accent');
         } else {
             btn.classList.remove('bg-slate-800');
-            btn.querySelector('div.bg-slate-700').classList.remove('bg-brand-accent');
+            const indicator = btn.querySelector('.bg-slate-700');
+            if (indicator) indicator.classList.remove('bg-brand-accent');
         }
     });
 
-    const response = await fetch('/api/strategies'); // In production optimize this
+    const response = await fetch('/api/strategies');
     const strategies = await response.json();
     const strategy = strategies.find(s => s.id === id);
     if (strategy) loadStrategy(strategy);
@@ -111,16 +110,20 @@ function loadStrategy(strategy) {
         </div>`;
     }
 
-    // Render Actions
+    // Render Actions (only visible ones)
     if (strategy.actions) {
-        html += `<div class="flex flex-wrap gap-4">
-            ${strategy.actions.map(action => `
-                <button onclick="executeAction('${action.name}')" 
-                        class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-900/20">
-                    ${action.label}
-                </button>
-            `).join('')}
-        </div>`;
+        const visibleActions = strategy.actions.filter(a => !a.hidden);
+
+        if (visibleActions.length > 0) {
+            html += `<div class="flex flex-wrap gap-4">
+                ${visibleActions.map(action => `
+                    <button onclick="window.executeAction('${action.name}')" 
+                            class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-900/20">
+                        ${action.label}
+                    </button>
+                `).join('')}
+            </div>`;
+        }
     }
 
     // Result Area
@@ -168,7 +171,7 @@ function renderChart(canvasId, config) {
                 label: config.label,
                 data: config.data.map(d => d.y),
                 borderColor: config.color,
-                backgroundColor: config.color + '20', // transparent fill
+                backgroundColor: config.color + '20',
                 tension: 0.4,
                 fill: true
             }]
@@ -184,8 +187,8 @@ function renderChart(canvasId, config) {
     });
 }
 
-// Execute Action with Backend
-async function executeAction(actionName) {
+// Execute Action with Backend (Exposed to window)
+window.executeAction = async function (actionName) {
     const resultArea = document.getElementById('result-area');
     resultArea.classList.remove('hidden');
     resultArea.innerHTML = `<div class="flex items-center gap-3 text-slate-400"><div class="animate-spin h-5 w-5 border-2 border-brand-accent border-t-transparent rounded-full"></div> Processing with MedGemma...</div>`;
@@ -207,31 +210,44 @@ async function executeAction(actionName) {
         });
         const result = await response.json();
 
-        // Show Result
         console.log("Result received:", result);
-        console.log("Data type:", typeof result.data);
-        console.log("Is Array:", Array.isArray(result.data));
 
-        let resultContent = '';
-        // Robust check for array-like objects
-        if (Array.isArray(result.data) || (result.data && result.data.length !== undefined && typeof result.data !== 'string')) {
-            console.log("Rendering cards...");
-            resultContent = renderDimensionCards(result.data);
-            resultArea.className = "glass-panel p-6 rounded-2xl border-l-4 border-brand-accent bg-brand-accent/5 grid gap-4";
-        } else if (typeof result.data === 'object') {
-            resultContent = `<pre class="text-white text-sm overflow-x-auto">${JSON.stringify(result.data, null, 2)}</pre>`;
-            resultArea.className = "glass-panel p-6 rounded-2xl border-l-4 border-brand-accent bg-brand-accent/5";
-        } else {
-            resultContent = `<p class="text-white text-lg">${result.data}</p>`;
-            resultArea.className = "glass-panel p-6 rounded-2xl border-l-4 border-brand-accent bg-brand-accent/5";
+        // DELEGATE RENDERING TO STRATEGY MODULE
+        const strategyModule = getStrategy(currentStrategyId, currentMetadata);
+        strategyModule.renderResults(result.data, resultArea, result.message);
+
+        // FALLBACK: If strategy module didn't add save button, add it here
+        if (currentStrategyId === 'home_triage' && !resultArea.querySelector('#save-triage-btn')) {
+            console.log("Fallback: Adding save button from app.js");
+            const btnDiv = document.createElement('div');
+            btnDiv.className = "mt-6 flex justify-end";
+            btnDiv.innerHTML = `
+                <button id="save-triage-btn" 
+                        class="bg-green-600 hover:bg-green-500 text-white px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 active:scale-95 shadow-lg shadow-green-900/20 flex items-center gap-2">
+                    <span>💾</span> Save to Vault
+                </button>
+            `;
+            resultArea.appendChild(btnDiv);
+
+            btnDiv.querySelector('#save-triage-btn').onclick = async () => {
+                try {
+                    const saveResp = await fetch('/api/run/home_triage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ data: { action: "save_analysis", payload: result.data } })
+                    });
+                    const saveResult = await saveResp.json();
+                    if (saveResult.status === "success") {
+                        alert("✅ Saved to Vault! ID: " + saveResult.data.id);
+                    } else {
+                        alert("❌ Save failed: " + saveResult.message);
+                    }
+                } catch (e) {
+                    console.error("Save error:", e);
+                    alert("Error saving to vault.");
+                }
+            };
         }
-
-        resultArea.innerHTML = `
-            <h5 class="text-sm font-bold uppercase tracking-wide mb-4 ${result.status === 'warning' ? 'text-brand-warning' : 'text-brand-accent'}">
-                ${result.message}
-            </h5>
-            ${resultContent}
-        `;
 
         if (result.status === 'warning') {
             resultArea.classList.replace('border-brand-accent', 'border-brand-warning');
@@ -239,47 +255,10 @@ async function executeAction(actionName) {
         }
 
     } catch (error) {
+        console.error(error);
         resultArea.innerHTML = `<div class="text-red-500">Error executing action.</div>`;
     }
 }
 
 // Start
 init();
-
-function renderDimensionCards(data) {
-    return `
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            ${data.map((item, index) => {
-        let colorClass = 'text-green-400';
-        let bgClass = 'bg-green-500/10';
-        let borderClass = 'border-green-500/20';
-
-        // Map backend severity to frontend styles
-        if (item.severity === 'red') {
-            colorClass = 'text-red-400';
-            bgClass = 'bg-red-500/10';
-            borderClass = 'border-red-500/20';
-        } else if (item.severity === 'yellow') {
-            colorClass = 'text-yellow-400';
-            bgClass = 'bg-yellow-500/10';
-            borderClass = 'border-yellow-500/20';
-        }
-
-        return `
-                    <div class="glass-panel p-4 rounded-xl border ${borderClass} ${bgClass} flex flex-col justify-between h-full animate-fade-in" style="animation-delay: ${index * 100}ms">
-                        <div>
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">${item.dimension}</h4>
-                            <p class="text-lg font-semibold ${colorClass}">${item.status}</p>
-                        </div>
-                         <div class="mt-4 pt-3 border-t border-slate-700/50 flex justify-between items-center">
-                            <span class="text-xs text-slate-400">${item.focus || 'Analysis'}</span>
-                            <span class="text-xs font-mono bg-slate-800 px-2 py-1 rounded text-slate-300">
-                                ${(item.confidence * 100).toFixed(0)}% Conf
-                            </span>
-                        </div>
-                    </div>
-                `;
-    }).join('')}
-        </div>
-    `;
-}

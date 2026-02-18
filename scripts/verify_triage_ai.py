@@ -27,10 +27,21 @@ def test_analyze_trends():
     if isinstance(data, list):
         print(f"{'Dimension':<30} | {'Status':<15} | {'Severity':<10} | {'Conf':<6}")
         print("-" * 70)
+        print("-" * 70)
         for item in data:
             print(f"{item.get('dimension', 'N/A'):<30} | {item.get('status', 'N/A'):<15} | {item.get('severity', 'N/A'):<10} | {item.get('confidence', 0):.2f}")
+
+    print("\n--- Medical Vault Verification ---")
+    from data.medical_vault import vault
+    entries = vault.get_entries(limit=1)
+    if entries:
+        last = entries[0]
+        print(f"✅ Last Entry Found: ID {last['id']}")
+        print(f"📅 Timestamp: {last['timestamp']}")
+        print(f"🏷️  Category: {last['category']}")
+        print(f"📦 Content Keys: {list(last['content'][0].keys()) if isinstance(last['content'], list) and last['content'] else 'N/A'}")
     else:
-        print(data)
+        print("❌ No entries found in Medical Vault.")
 
 if __name__ == "__main__":
     test_analyze_trends()
