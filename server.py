@@ -95,6 +95,9 @@ class NoCacheStaticMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(NoCacheStaticMiddleware)
 
+# Mount data directory for audio/video playback
+app.mount("/data", StaticFiles(directory=DATA_DIR), name="data")
+
 # Mount static files (MUST be last to not override API routes)
 app.mount("/", StaticFiles(directory=os.path.join(BASE_DIR, "static"), html=True), name="static")
 
