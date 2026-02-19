@@ -78,21 +78,23 @@ class ConsultStrategy(CareStageStrategy):
         if not transcript:
             return {"status": "error", "message": "No transcript provided"}
             
+        # Highly optimized, low-token system prompt.
+        # Directives like "medical shorthand" and "strictly concise" drastically reduce output tokens.
         system_prompt = (
-            "You are an expert physician assistant. "
-            "Analyze the consultation transcript and generate a structured summary including:\n"
-            "1. **Key Discussion Points & Important Factors**: List all critical symptoms, observations, and patient concerns.\n"
-            "2. **Clinical Note**: Standard SOAP format (Subjective, Objective, Assessment, Plan).\n"
-            "Ensure the output doesn't just repeat the transcript but synthesizes the information."
+            "Role: PA. Synthesize transcript into:\n"
+            "1. Key Points\n"
+            "2. SOAP Note\n"
+            "Constraint: Be strictly concise. Use standard medical shorthand. Synthesize, do not repeat."
         )
         
-        prompt = f"{system_prompt}\n\nTranscript:\n{transcript}\n\nCLINICAL NOTE:"
+        prompt = f"{system_prompt}\nTranscript:\n{transcript}\nNOTE:"
         
         note = ModelRegistry.run_inference("consult_reasoning", prompt)
         
         # Cleanup
-        note = note.replace("CLINICAL NOTE:", "").strip()
-        
+        note = note.replace("NOTE:", "").strip()
+
+
         return {
             "status": "success",
             "data": {"note": note}
