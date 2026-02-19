@@ -2,12 +2,14 @@ import { BaseStrategy } from './base_strategy.js?v=9';
 import { HomeTriageStrategy } from './home_triage.js?v=9';
 import { IntakeStrategy } from './intake.js?v=9';
 import { ConsultStrategy } from './consult.js?v=9';
+import { PharmacyStrategy } from './pharmacy.js?v=9';
 
 // Strategy Registry
 const strategies = {
     'home_triage': HomeTriageStrategy,
     'intake': IntakeStrategy,
     'consult': ConsultStrategy,
+    'pharmacy': PharmacyStrategy,
     // Add others here as needed, falling back to BaseStrategy if not found
     'default': BaseStrategy
 };
