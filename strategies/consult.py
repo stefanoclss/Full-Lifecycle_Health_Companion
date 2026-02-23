@@ -75,6 +75,17 @@ class ConsultStrategy(CareStageStrategy):
         }
 
     def generate_clinical_note(self, transcript):
+        import os
+        if os.environ.get("DEMO_MODE") == "True":
+            from data.medical_vault import vault
+            entries = vault.get_entries(category="clinical_note", limit=10)
+            for entry in entries:
+                if "consultation" in entry.get("tags", []):
+                    return {
+                        "status": "success",
+                        "data": {"note": entry["content"]}
+                    }
+
         if not transcript:
             return {"status": "error", "message": "No transcript provided"}
             

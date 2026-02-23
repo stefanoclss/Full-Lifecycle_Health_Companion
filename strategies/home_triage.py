@@ -57,6 +57,18 @@ class HomeTriageStrategy(CareStageStrategy):
 
     def analyze_trends(self):
         """Queries DB and uses AI logprobs to classify patient status across 5 dimensions."""
+        import os
+        if os.environ.get("DEMO_MODE") == "True":
+            logger.info("Demo Mode: Fetching Home Triage from Vault")
+            entries = vault.get_entries(category="Home Triage", limit=1)
+            if entries:
+                return {
+                    "status": "success",
+                    "message": "Multi-dimensional Health Analysis Complete (DEMO)",
+                    "data": entries[0]["content"],
+                    "metrics": self._fetch_patient_data()
+                }
+
         try:
             logger.info("Starting Home Triage Analysis...")
             data = self._fetch_patient_data()

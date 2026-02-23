@@ -7,7 +7,12 @@
 
 ## Overview
 
-ArcVault Health Companion is an advanced health companion application designed to close the care loop by integrating AI-driven patient agents. It leverages Google's HAI-DEF (Healthcare AI Data Embedding Framework) models to provide intelligent support across various stages of patient care, from home triage to monitoring.
+ArcVault Health Companion is an advanced health companion application designed to close the care loop by integrating AI-driven patient agents. It leverages Google's HAI-DEF (Healthcare AI Data Embedding Framework) models, including MedGemma and TxGemma, to provide intelligent support across various stages of patient care. 
+
+**Key Capabilities:**
+*   **Home Self-Triage**: Multi-dimensional health analysis based on activity and sleep patterns.
+*   **Precision Pharmacy**: AI-powered drug interaction and property checks for FDA-approved structures.
+*   **Medical Vault**: A local, secure persistence layer to save patient interactions, analyses, and alerts.
 
 ## Prerequisites
 
@@ -69,6 +74,13 @@ ArcVault Health Companion is an advanced health companion application designed t
     pip install -r requirements.txt
     ```
 
+4.  **Configure Environment Variables:**
+    Copy the example template to create your `.env` file:
+    ```bash
+    cp .env.example .env
+    ```
+    Edit `.env` and add your HuggingFace token and adjust `DEMO_MODE` if needed.
+
 ## Model Setup
 
 This application relies on specific pre-trained models. You need to download them before running the application.
@@ -98,6 +110,8 @@ This application relies on specific pre-trained models. You need to download the
 
 ## Running the Application
 
+### Standard Setup
+
 Start the application server:
 ```bash
 python server.py
@@ -107,6 +121,28 @@ Once the server is running, open your web browser and navigate to:
 `http://127.0.0.1:8000`
 
 API documentation is available at `http://127.0.0.1:8000/docs`.
+
+### Docker Setup (Production Ready)
+
+To run the application inside a container:
+
+```bash
+docker build -t health-companion .
+docker run -p 8000:8000 --env-file .env health-companion
+```
+
+### Demo Mode
+
+For fast demonstrations without waiting for live AI inference, you can enable **Demo Mode**. This bypasses real-time inference and instead pulls the latest matching historical data from the **Medical Vault**.
+
+To enable it, set the environment variable:
+```bash
+# Windows
+$env:DEMO_MODE="True"
+# Linux/Mac/Docker
+export DEMO_MODE="True"
+```
+Or simply set `DEMO_MODE=True` in your `.env` file.
 
 ## Database Inspection
 

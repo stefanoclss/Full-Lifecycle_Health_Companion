@@ -87,6 +87,21 @@ class IntakeStrategy(CareStageStrategy):
         }
 
     def generate_report(self, payload: dict):
+        import os
+        if os.environ.get("DEMO_MODE") == "True":
+            from data.medical_vault import vault
+            entries = vault.get_entries(category="clinical_note", limit=10)
+            for entry in entries:
+                if "pre_briefing" in entry.get("tags", []):
+                    return {
+                        "status": "success",
+                        "message": "Pre-Briefing Note Generated (DEMO)",
+                        "data": {
+                            "report": entry["content"],
+                            "history": payload.get("history", [])
+                        }
+                    }
+
         history = payload.get("history", [])
         
         conversation_text = "\n".join([f"{msg['role'].upper()}: {msg['content']}" for msg in history])

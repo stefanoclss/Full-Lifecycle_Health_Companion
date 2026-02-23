@@ -17,6 +17,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="ArcVault Health Companion", lifespan=lifespan)
 
 # Configuration
+os.environ["DEMO_MODE"] = "True"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODELS_DIR = os.path.join(BASE_DIR, "ml_models")
 DATA_DIR = os.path.join(BASE_DIR, "data")

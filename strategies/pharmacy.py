@@ -250,6 +250,18 @@ class PharmacyStrategy(CareStageStrategy):
             return self.save_analysis(data.get("payload"))
 
         if action == "analyze_drugs":
+            import os
+            if os.environ.get("DEMO_MODE") == "True":
+                logger.info("Demo Mode: Fetching Pharmacy Analysis from Vault")
+                entries = vault.get_entries(category="Pharmacy Analysis", limit=1)
+                if entries:
+                    return {
+                        "status": "success",
+                        "message": "Analysis Complete (DEMO)",
+                        "data": entries[0]["content"],
+                        "alert": True,
+                    }
+
             medicines = self._load_random_medicines(2)
             if not medicines:
                 return {
